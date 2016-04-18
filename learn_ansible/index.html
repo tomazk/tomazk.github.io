@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Ansible for Developers in 30 min</title>
+    <meta charset="utf-8">
+    <style>
+      @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body { font-family: 'Droid Serif'; }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: normal;
+      }
+
+
+      .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
+
+      .remark-inline-code {
+        background-color: #eee;
+      }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+
+class: center, middle
+
+# Ansible for Developers in 30 min
+
+Tomaž Kovačič ([@tomazk](http://github.com/tomazk) on github)
+
+---
+
+class: center, middle
+
+# Why should a developer learn Ansible?
+
+---
+
+# *I'll just use bash* ...
+```bash
+if ssh $HOST stat $REMOTE_PATH$FILE
+then
+  echo "file exists"
+else
+  scp $FILE $HOST:$REMOTE_PATH$FILE
+  echo "copy file to remote host"
+fi
+
+REMOTE_HASH=$(ssh $HOST "md5sum $REMOTE_PATH$FILE" | sed "s/ .*$//g")
+LOCAL_HASH=$(md5sum $FILE | sed "s/ .*$//g")
+
+if [ "$REMOTE_HASH" != "$LOCAL_HASH" ]
+then
+  echo "files are different - copy file"
+  scp $FILE $HOST:$REMOTE_PATH$FILE
+fi
+
+ssh $HOST "chmod 664 $REMOTE_PATH$FILE"
+```
+
+---
+
+# Further questions
+
+* How do you manage output of the remote bash scripts?
+* How to make your bash script idempotent?
+* How to paralelize your scripts to run them against multiple servers?
+* ...
+
+**Anwser:** All of the above is doable in bash, but some good people developed better tools for this!
+
+---
+
+class: middle
+
+# Ansible
+
+
+```yml
+- name: make sure this file is present on a server
+  copy: src=templates/file_name.txt
+        dest=/remote/path/file_name.txt
+        mode="u=rw,g=rw,a=r"
+```
+
+---
+
+
+
+# Ansible
+## *What about Chef | Puppet | Salt | ... ?*
+
+1. Ansible is simple to learn and start with
+  * no agents, no masters
+
+2. Ansible is written in python and config is based on YAML
+  * chef and pupet config is ruby DSL
+
+3. You only need your machine, remote servers and SSH access
+
+
+---
+
+class: middle
+
+# Ansible Concepts
+
+1. Inventory
+2. Module
+3. Playbook
+
+*Let's explain these through a mini tutorial ...*
+
+
+---
+# Mini Tutorial
+## 1. Inventory
+
+`/etc/ansible/hosts` is where you tell ansible where your servers are
+
+```config
+[webnodes]
+n2 ansible_host=54.157.240.35
+n1 ansible_host=54.147.244.81
+
+[webnodes:vars]
+ansible_user=ubuntu
+
+[haproxy]
+haproxy1 ansible_host=54.204.93.217
+haproxy2 ansible_host=54.145.233.42
+
+[haproxy:vars]
+ansible_user=debian
+```
+---
+
+# Mini Tutorial
+## 2. Module
+
+* Modules are high level *"commands"* that can be executed on a remote server.
+* They abstract away a lot of unimportant details and promote best practices.
+
+```yml
+- name: make sure this file is present on a server
+  copy: src=templates/file_name.txt
+        dest=/remote/path/file_name.txt
+        mode="u=rw,g=rw,a=r"
+```
+The [`copy`](http://docs.ansible.com/ansible/copy_module.html) module.
+
+---
+
+# Mini Tutorial
+
+## 3. Playbook
+
+Playbooks are recepies that are run against a single or a series of remote servers.
+
+`example_playbook.yaml`
+```yaml
+- hosts: nodes
+  tasks:
+      - name: copy
+        copy: src=templates/file_name.txt
+              dest=/remote/path/file_name.txt
+              mode="u=rw,g=rw,a=r"
+        become: yes
+        become_method: sudo
+```
+
+```bash
+$ ansible-playbook example_playbook.yaml
+```
+
+
+---
+class: center, middle
+
+# That's it. Now you know Ansible.
+
+---
+
+class: center, middle
+
+# What more?
+Let's just expand on all 3 concepts and explore some realistic examples.
+
+---
+
+# Ad-hoc Commands
+
+Every module can be run as a single command
+
+```bash
+$ ansible webnodes -m ping
+```
+
+```bash
+$ ansible webnodes -m command -a "shutdown -r now"
+```
+
+
+---
+
+# Dynamic Inventory
+
+### Perfect marriage of [AWS and Ansible](http://docs.ansible.com/ansible/intro_dynamic_inventory.html#example-aws-ec2-external-inventory-script)
+
+1. Provide Ansible with your AWS credentials in the environment.
+```bash
+export AWS_ACCESS_KEY_ID='...'
+export AWS_SECRET_ACCESS_KEY='...'
+```
+
+2. Download [`https://raw.github.com/.../ec2.py`](https://raw.github.com/ansible/ansible/devel/contrib/inventory/ec2.py) and `chmod u+x ec2.py`
+
+3. Download and modify your ec2 defaults in [`ec2.ini`](https://raw.githubusercontent.com/ansible/ansible/devel/contrib/inventory/ec2.ini).
+
+4. See what invenotry is available `./ec2.py --refresh-cache`
+
+5. Ping all servers in group `webnodes` (fyi: group is just another resource tag in AWS)
+   `ansible tag_group_webnodes -i ec2.py -m ping`
+
+---
+
+
+
+
+    </textarea>
+    <script src="https://gnab.github.io/remark/downloads/remark-latest.min.js">
+    </script>
+    <script>
+      var slideshow = remark.create();
+    </script>
+  </body>
+</html>
