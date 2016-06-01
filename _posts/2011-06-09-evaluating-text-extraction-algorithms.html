@@ -41,7 +41,7 @@ date_gmt: '2011-06-09 23:49:34 +0200'
 <h2>Metrics</h2>
 <p>I'm using <em>precision</em>, <em>recall</em> and <em>f1 score </em>to evaluate the performance.  I covered these in one of my <a href="http://tomazkovacic.com/blog/74/evaluation-metrics-for-text-extraction-algorithms/">previous posts</a>, but here is a short recap:</p>
 <p>Definitions:</p>
-<p><a href="http://tomazkovacic.com/blog/wp-content/uploads/2011/03/precision.gif"><img class="alignnone size-full wp-image-75" title="precision" src="http://tomazkovacic.com/blog/wp-content/uploads/2011/03/precision.gif" alt="" width="189" height="44" /></a> <a href="http://tomazkovacic.com/blog/wp-content/uploads/2011/03/recall.gif"><img class="alignnone size-full wp-image-76" title="recall" src="http://tomazkovacic.com/blog/wp-content/uploads/2011/03/recall.gif" alt="" width="160" height="44" /></a> <a href="http://tomazkovacic.com/blog/wp-content/uploads/2011/03/f1-score.gif"><img class="alignnone size-full wp-image-83" title="f1-score" src="http://tomazkovacic.com/blog/wp-content/uploads/2011/03/f1-score.gif" alt="" width="250" height="42" /></a></p>
+<p><a href="/public/uploads/03/precision.gif"><img class="alignnone size-full wp-image-75" title="precision" src="/public/uploads/03/precision.gif" alt="" width="189" height="44" /></a> <a href="/public/uploads/03/recall.gif"><img class="alignnone size-full wp-image-76" title="recall" src="/public/uploads/03/recall.gif" alt="" width="160" height="44" /></a> <a href="/public/uploads/03/f1-score.gif"><img class="alignnone size-full wp-image-83" title="f1-score" src="/public/uploads/03/f1-score.gif" alt="" width="250" height="42" /></a></p>
 <p>Given an HTML document we predict/extract/<strong>retrieve</strong> a sequence of words and denote them as <em>S<sub><strong>ret</strong></sub></em>. Consequentially the sequence of words representing <strong>relevant</strong> text is denoted as <em>S</em><em><sub><strong>rel</strong> </sub></em>.</p>
 <p>Both sequences are constructed by the following procedure:</p>
 <ol>
@@ -104,13 +104,13 @@ date_gmt: '2011-06-09 23:49:34 +0200'
 </ul>
 <p>Admittedly they are not all specialized for solving problems in a specific domain, say news article content extraction, but they all share one common property: they're capable of distinguishing<em> </em>useful textual content apart from boilerplate and useless content when observing an arbitrary html document.</p>
 <p>Results were obtained by calculating precision and recall for each document in the dataset for every content extractor. Then we calculate the arithmetic mean of all three metrics for every extractor. Bar charts are employed to visualize the results.</p>
-<table style="border: none;">
+<table style="border: none; font-size: 70%;">
 <tbody>
 <tr style="border: none;">
 <td style="border: none;">
-<p>[caption id="attachment_154" align="alignnone" width="250" caption="Precision, recall &amp; F1 score mean - Google news dataset"]<a href="http://tomazkovacic.com/blog/wp-content/uploads/2011/06/google-news-dataset_stat.png"><img class="size-medium wp-image-154" title="google-news-dataset_stat" src="http://tomazkovacic.com/blog/wp-content/uploads/2011/06/google-news-dataset_stat-250x300.png" alt="" width="250" height="300" /></a>[/caption]</td>
+<p>Precision, recall &amp; F1 score mean - Google news dataset<a href="/public/uploads/06/google-news-dataset_stat.png"><img class="size-medium wp-image-154" title="google-news-dataset_stat" src="/public/uploads/06/google-news-dataset_stat-250x300.png" alt="" width="250" height="300" /></a></td>
 <td style="border: none;">
-<p>[caption id="attachment_156" align="alignnone" width="250" caption="Precision, recall &amp; F1 score mean - Cleaneval dataset"]<a href="http://tomazkovacic.com/blog/wp-content/uploads/2011/06/cleaneval-final-dataset_stat.png"><img class="size-medium wp-image-156" title="cleaneval-final-dataset_stat" src="http://tomazkovacic.com/blog/wp-content/uploads/2011/06/cleaneval-final-dataset_stat-250x300.png" alt="" width="250" height="300" /></a>[/caption]</td>
+<p>Precision, recall &amp; F1 score mean - Cleaneval dataset<a href="/public/uploads/06/cleaneval-final-dataset_stat.png"><img class="size-medium wp-image-156" title="cleaneval-final-dataset_stat" src="/public/uploads/06/cleaneval-final-dataset_stat-250x300.png" alt="" width="250" height="300" /></a></td>
 </tr>
 </tbody>
 </table>
@@ -291,25 +291,25 @@ date_gmt: '2011-06-09 23:49:34 +0200'
 </tbody>
 </table>
 <p>Next we explore the distribution of per document measurements. Instead of just calculating the mean of precision, recall and F1 score we can explore the frequencies of per document measurements. In the following chart we visualize frequencies for each metric for all extractors. Notice that we're splitting the [0,1] interval of each metric into 20 bins with equidistant intervals.</p>
-<table style="border: none;">
+<table style="border: none; font-size: 70%;">
 <tbody>
 <tr style="border: none;">
 <td style="border: none;">
-<p>[caption id="attachment_159" align="alignnone" width="240" caption="Metric distributions - Google news dataset"]<a href="http://tomazkovacic.com/blog/wp-content/uploads/2011/06/google-news-extr_stat.png"><img class="size-medium wp-image-159" title="google-news-extr_stat" src="http://tomazkovacic.com/blog/wp-content/uploads/2011/06/google-news-extr_stat-240x300.png" alt="" width="240" height="300" /></a>[/caption]</td>
+<p>Metric distributions - Google news dataset<a href="/public/uploads/06/google-news-extr_stat.png"><img class="size-medium wp-image-159" title="google-news-extr_stat" src="/public/uploads/06/google-news-extr_stat-240x300.png" alt="" width="240" height="300" /></a></td>
 <td style="border: none;">
-<p>[caption id="attachment_157" align="alignnone" width="240" caption="Metric distributions - Cleaneval dataset"]<a href="http://tomazkovacic.com/blog/wp-content/uploads/2011/06/cleaneval-final-extr_stat.png"><img class="size-medium wp-image-157" title="cleaneval-final-extr_stat" src="http://tomazkovacic.com/blog/wp-content/uploads/2011/06/cleaneval-final-extr_stat-240x300.png" alt="" width="240" height="300" /></a>[/caption]</td>
+<p>Metric distributions - Cleaneval dataset<a href="/public/uploads/06/cleaneval-final-extr_stat.png"><img class="size-medium wp-image-157" title="cleaneval-final-extr_stat" src="/public/uploads/06/cleaneval-final-extr_stat-240x300.png" alt="" width="240" height="300" /></a></td>
 </tr>
 </tbody>
 </table>
 <p>To account for previously mentioned 4 special cases, we employ a stacked bar chart to inspect the margins of useful/successful per document measurements for every dataset.</p>
-<table style="border: none;">
+<table style="border: none; font-size: 70%;">
 <tbody>
 <tr style="border: none;">
 <td style="border: none;">
-[caption id="attachment_155" align="alignnone" width="300" caption="Special cases of per document measurements - Cleaneval dataset"]<a href="http://tomazkovacic.com/blog/wp-content/uploads/2011/06/cleaneval-final-contents.png"><img src="http://tomazkovacic.com/blog/wp-content/uploads/2011/06/cleaneval-final-contents-300x225.png" alt="" title="cleaneval-final-contents" width="300" height="225" class="size-medium wp-image-155" /></a>[/caption]</p>
+Special cases of per document measurements - Cleaneval dataset<a href="/public/uploads/06/cleaneval-final-contents.png"><img src="/public/uploads/06/cleaneval-final-contents-300x225.png" alt="" title="cleaneval-final-contents" width="300" height="225" class="size-medium wp-image-155" /></a></p>
 </td>
 <td style="border: none;">
-<p>[caption id="attachment_158" align="alignnone" width="300" caption="Special cases of per document measurements - Google news dataset"]<a href="http://tomazkovacic.com/blog/wp-content/uploads/2011/06/google-news-contents.png"><img src="http://tomazkovacic.com/blog/wp-content/uploads/2011/06/google-news-contents-300x225.png" alt="" title="google-news-contents" width="300" height="225" class="size-medium wp-image-158" /></a>[/caption]</p>
+<p>Special cases of per document measurements - Google news dataset<a href="/public/uploads/06/google-news-contents.png"><img src="/public/uploads/06/google-news-contents-300x225.png" alt="" title="google-news-contents" width="300" height="225" class="size-medium wp-image-158" /></a></p>
 </td>
 </tr>
 </tbody>

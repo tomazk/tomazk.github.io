@@ -16,6 +16,7 @@ wordpress_url: http://blog.tomazkovacic.com/?p=14
 date: '2011-03-02 23:28:43 +0100'
 date_gmt: '2011-03-02 23:28:43 +0100'
 ---
+
 <p>In the world of web scraping, text mining and article reading utilities (readability bookmarklet) there is an ever growing demand for utilities that are capable of distinguishing parts of a HTML document which represent an article apart from other common website building blocks like menus, headers, footers, ads etc.</p>
 <p>Turns out this problem was baffling researchers since the early 00s. Keep in mind, that back then, folks were still making websites with microsoft frontpage. The majority of methods presented in research papers from that epoch are nowadays useless due to strong assumptions and heuristics that don’t apply on today’s web development practices.<br />
 In the following chapters I’ll try to review some article text extraction methods that are applicable to today’s websites. They mostly leverage on machine learning, statistics and a wide rage of heuristics.</p>
@@ -35,7 +36,7 @@ To obtain a set of learning examples that are fed into a classifier, boilerplate
 <h2>Extracting Article Text from the Web with Maximum Subsequence Segmentation</h2>
 <p>The <a href="http://www.www2009.org/proceedings/pdf/p971.pdf">overall algorithm</a> (MSS) transforms the problem of detecting article text in HTML documents to <em>maximum subsequence optimization</em>.</p>
 <p>Let’s start of by examining maximal subsequence optimization and it’s problem statement. Given a sequence of numbers, we've been given a task of finding a continuous subsequence where the sum of it's elements is maximal. This is trivial if the elements of the sequence are all non-negative. In other words:</p>
-<p><a href="http://tomazkovacic.com/blog/wp-content/uploads/2011/03/CodeCogsEqn.gif"><img class="alignnone size-full wp-image-22" title="CodeCogsEqn" src="http://tomazkovacic.com/blog/wp-content/uploads/2011/03/CodeCogsEqn.gif" alt="" width="198" height="51" /></a></p>
+<p><a href="/public/uploads/03/CodeCogsEqn.gif"><img class="alignnone size-full wp-image-22" title="CodeCogsEqn" src="/public/uploads/03/CodeCogsEqn.gif" alt="" width="198" height="51" /></a></p>
 <p>In terms of time complexity this can easily be computed in <em>O(n),</em> where <em>n</em> stands for number of elements in the original sequence.</p>
 <p>Now let’s take a look at the representation of documents used in MSS. Each document is tokenized using the following procedure:</p>
 <ol>
@@ -69,7 +70,7 @@ To obtain a set of learning examples that are fed into a classifier, boilerplate
 </ol>
 <p>The resulting TTRArray holds a text-to-tag ratio for every line in the filtered HTML document.</p>
 <p>Clustering can be applied to the TTRArray to obtain lines of text that represent the article by considering the following heuristic:</p>
-<p>[caption id="attachment_23" align="alignright" width="300" caption="TTRArray (image courtesy of Weninger &amp; Hsu: Text Extraction from the Web via Text-to-Tag Ratio)"]<a href="http://tomazkovacic.com/blog/wp-content/uploads/2011/03/random17.png"><img class="size-medium wp-image-23 " title="TTRArray " src="http://tomazkovacic.com/blog/wp-content/uploads/2011/03/random17-300x166.png" alt="" width="300" height="166" /></a>[/caption]</p>
+<p><small>TTRArray (image courtesy of Weninger &amp; Hsu: Text Extraction from the Web via Text-to-Tag Ratio)</small><a href="/public/uploads/03/random17.png"><img class="size-medium wp-image-23 " title="TTRArray " src="/public/uploads/03/random17-300x166.png" alt="" width="300" height="166" /></a></p>
 <blockquote><p>For each k in TTRArray, the higher the TTR is for an element k relative to the mean TTR of the entire array the more likely that  k represents a line of content-text within the HTML-page.</p></blockquote>
 <p>Prior to clustering, TTRArray is passed by a smoothing function to prevent the loss of short paragraph lines that might still be part of the content at the edges of the article.</p>
 <p><a href="http://www.cs.illinois.edu/homes/weninge1/pubs/WH_TIR08.pdf"> Weninger &amp; Hsu</a> propose the following clustering techniques to obtain article text:</p>
@@ -80,7 +81,7 @@ To obtain a set of learning examples that are fed into a classifier, boilerplate
 <li>Threshold clustering; using standard deviation as a cut-of threshold</li>
 </ul>
 <h2>VIPS: a Vision based Page Segmentation Algorithm</h2>
-<p>[caption id="attachment_26" align="alignright" width="300" caption="Semantic tree structure  (source http://www.zjucadcg.cn/dengcai/VIPS/VIPS.html)"]<a href="http://tomazkovacic.com/blog/wp-content/uploads/2011/03/VIPS.jpg"><img class="size-medium wp-image-26 " title="VIPS" src="http://tomazkovacic.com/blog/wp-content/uploads/2011/03/VIPS-300x270.jpg" alt="" width="300" height="270" /></a>[/caption]</p>
+<p><small>Semantic tree structure  (source http://www.zjucadcg.cn/dengcai/VIPS/VIPS.html)</small><a href="/public/uploads/03/VIPS.jpg"><img class="size-medium wp-image-26 " title="VIPS" src="/public/uploads/03/VIPS-300x270.jpg" alt="" width="300" height="270" /></a></p>
 <p>What’s distinctive about <a href="http://www.zjucadcg.cn/dengcai/VIPS/VIPS.html">this algorithm</a> from others mentioned in this post is making full use of the visual page layout features.</p>
 <p>It first extracts blocks from the HTML DOM tree and assigns them a value that indicates the coherency of the block based on visual perception. A hierarchical semantic structure is then employed to represent the structure of the website. The algorithm applies vertical and horizontal separators to the block layout to construct such a semantic structure.</p>
 <p>The constructed structure is then used to find parts of the website that represents article text and other common building blocks.</p>
