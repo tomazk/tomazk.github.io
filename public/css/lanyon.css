@@ -99,9 +99,21 @@ h1, h2, h3, h4, h5, h6 {
 .masthead {
   padding-top:    1rem;
   padding-bottom: 1rem;
-  margin-bottom: 3rem;
-  border-bottom: 1px solid #eee;
+  margin-bottom: 0;
 }
+
+.spacer {
+  background-image: url(../head_long.png);
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  margin-bottom: 3rem;
+}
+
+.spacer-height {
+  height: 250px;
+}
+
 .masthead-title {
   margin-top: 0;
   margin-bottom: 0;
@@ -123,6 +135,9 @@ h1, h2, h3, h4, h5, h6 {
   }
   .masthead-title small {
     display: none;
+  }
+  .spacer-height {
+    height: 150px;
   }
 }
 

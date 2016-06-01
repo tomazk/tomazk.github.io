@@ -1,0 +1,93 @@
+---
+layout: post
+status: publish
+published: true
+title: 'Overview: Extracting article text from HTML documents'
+author:
+  display_name: tomaz
+  login: tomaz
+  email: tomaz.kovacic@gmail.com
+  url: ''
+author_login: tomaz
+author_email: tomaz.kovacic@gmail.com
+wordpress_id: 14
+wordpress_url: http://blog.tomazkovacic.com/?p=14
+date: '2011-03-02 23:28:43 +0100'
+date_gmt: '2011-03-02 23:28:43 +0100'
+---
+<p>In the world of web scraping, text mining and article reading utilities (readability bookmarklet) there is an ever growing demand for utilities that are capable of distinguishing parts of a HTML document which represent an article apart from other common website building blocks like menus, headers, footers, ads etc.</p>
+<p>Turns out this problem was baffling researchers since the early 00s. Keep in mind, that back then, folks were still making websites with microsoft frontpage. The majority of methods presented in research papers from that epoch are nowadays useless due to strong assumptions and heuristics that don’t apply on today’s web development practices.<br />
+In the following chapters I’ll try to review some article text extraction methods that are applicable to today’s websites. They mostly leverage on machine learning, statistics and a wide rage of heuristics.</p>
+<h2>Boilerpipe library: Boilerplate Removal and Fulltext Extraction from HTML pages</h2>
+<p><a href="http://code.google.com/p/boilerpipe/"> Boilerpipe</a> is probably one of the best open source packages when it comes to full article text extraction that leverages on machine learning. The overall algorithm works by computing both text and structural features on parts of the document and based on these features, decide if the observed part of the document belongs to the article text or not. The decision rules are inferred by a classifier trained on a set of labeled documents.<br />
+To obtain a set of learning examples that are fed into a classifier, boilerplate observes a list of features on different levels of the HTML document:</p>
+<ul>
+<li>text frequency in the whole corpus: to obtain phrases commonly used in useless parts of the document</li>
+<li>presence of particular tags that enclose a block of text: <em>&lt;h#&gt;</em> headline, <em>&lt;p&gt;</em> paragraph, <em>&lt;a&gt;</em> anchor and <em>&lt;div</em>&gt; division</li>
+<li>shallow text features: average word length, average sentence length, absolute number of words in the segment</li>
+<li>local context of text: absolute and relative position of the text block</li>
+<li>heuristic features: number of words that start with an uppercase letter, number of words written in all-caps, number of date and time tokens, link density and certain ratios of those previously listed</li>
+<li>density of text blocks: number of words in a wrapped fixed column width text block divided by number of lines of the same block</li>
+</ul>
+<p>Each HTML document is segmented into atomic text blocks that are annotated with features listed above and labeled (by a human annotator) with <em>content</em> or <em>boilerpate</em> class.</p>
+<p>In the original paper authors used decision trees and SVMs, trained on previously mentioned set of learning examples, to classify parts of the newly observed document as content or boilerplate text.</p>
+<h2>Extracting Article Text from the Web with Maximum Subsequence Segmentation</h2>
+<p>The <a href="http://www.www2009.org/proceedings/pdf/p971.pdf">overall algorithm</a> (MSS) transforms the problem of detecting article text in HTML documents to <em>maximum subsequence optimization</em>.</p>
+<p>Let’s start of by examining maximal subsequence optimization and it’s problem statement. Given a sequence of numbers, we've been given a task of finding a continuous subsequence where the sum of it's elements is maximal. This is trivial if the elements of the sequence are all non-negative. In other words:</p>
+<p><a href="http://tomazkovacic.com/blog/wp-content/uploads/2011/03/CodeCogsEqn.gif"><img class="alignnone size-full wp-image-22" title="CodeCogsEqn" src="http://tomazkovacic.com/blog/wp-content/uploads/2011/03/CodeCogsEqn.gif" alt="" width="198" height="51" /></a></p>
+<p>In terms of time complexity this can easily be computed in <em>O(n),</em> where <em>n</em> stands for number of elements in the original sequence.</p>
+<p>Now let’s take a look at the representation of documents used in MSS. Each document is tokenized using the following procedure:</p>
+<ol>
+<li>discard everything between <em>&lt;script&gt;</em> and <em>&lt;style&gt;</em> tags</li>
+<li>break up HTML into a list of tags, words and numbers</li>
+<li>apply <a href="http://tartarus.org/~martin/PorterStemmer/">porter stemming</a> to all words</li>
+<li>generalize numeric tokens</li>
+</ol>
+<p>To apply maximum subsequence optimization to the particular representation of the document, MSS uses local token-level classifiers to find a score for each token of the document. A negative score indicates that the observed token is not likely to be considered as content and vica-versa for tokens with positive scores. Because MSS uses a global optimization over all scores, there is no need for highly accurate local classifiers.</p>
+<p>Experimental setup in the original paper uses Naive Bayes with 2 types of features for every labeled token in the document:</p>
+<ul>
+<li>trigram of token: the token itself and its 2 successors</li>
+<li>parent tag of token in the DOM tree (this can easily be implemented by maintaining a stack of tags when passing through the token array)</li>
+</ul>
+<p>Each score produced by the NB classifier is than transformed with <em>f(p) = p - 0.5</em> to obtain a sequence of scores ranging from <em>[-0.5, 0.5]</em>.</p>
+<p>This is basically it; local token-level classifier outputs a sequence of scores to which we apply maximum subsequence optimization. Indexes of the subsequence are used to result the set of tokens that represent the extracted content.</p>
+<h2>Text Extraction from the Web via Text-to-Tag Ratio</h2>
+<p>If MSS transformed the problem of article text extraction to maximum subsequence optimization; this approach transforms it to histogram clustering.</p>
+<p>Clustering is applied to the text-to-tag ratio array (TTRArray) which is obtained by the following procedure:</p>
+<ol>
+<li>remove all empty lines and everything between <em>&lt;script&gt;</em> tags from the given HTML document</li>
+<li>initialize the <em>TRRArray</em></li>
+<li><em> </em>for each line in the document
+<ol>
+<li>let <em>x</em> be the number of non-tag ASCII characters</li>
+<li>let <em>y</em> be the number of tags in that line</li>
+<li>if there are no tags in the current line than <em>TTRArray[ current line ] = x</em></li>
+<li>else <em>TTRArray[ current line ] = x/y</em></li>
+</ol>
+</li>
+</ol>
+<p>The resulting TTRArray holds a text-to-tag ratio for every line in the filtered HTML document.</p>
+<p>Clustering can be applied to the TTRArray to obtain lines of text that represent the article by considering the following heuristic:</p>
+<p>[caption id="attachment_23" align="alignright" width="300" caption="TTRArray (image courtesy of Weninger &amp; Hsu: Text Extraction from the Web via Text-to-Tag Ratio)"]<a href="http://tomazkovacic.com/blog/wp-content/uploads/2011/03/random17.png"><img class="size-medium wp-image-23 " title="TTRArray " src="http://tomazkovacic.com/blog/wp-content/uploads/2011/03/random17-300x166.png" alt="" width="300" height="166" /></a>[/caption]</p>
+<blockquote><p>For each k in TTRArray, the higher the TTR is for an element k relative to the mean TTR of the entire array the more likely that  k represents a line of content-text within the HTML-page.</p></blockquote>
+<p>Prior to clustering, TTRArray is passed by a smoothing function to prevent the loss of short paragraph lines that might still be part of the content at the edges of the article.</p>
+<p><a href="http://www.cs.illinois.edu/homes/weninge1/pubs/WH_TIR08.pdf"> Weninger &amp; Hsu</a> propose the following clustering techniques to obtain article text:</p>
+<ul>
+<li>K-means</li>
+<li>Expectation Maximization</li>
+<li>Farthest First</li>
+<li>Threshold clustering; using standard deviation as a cut-of threshold</li>
+</ul>
+<h2>VIPS: a Vision based Page Segmentation Algorithm</h2>
+<p>[caption id="attachment_26" align="alignright" width="300" caption="Semantic tree structure  (source http://www.zjucadcg.cn/dengcai/VIPS/VIPS.html)"]<a href="http://tomazkovacic.com/blog/wp-content/uploads/2011/03/VIPS.jpg"><img class="size-medium wp-image-26 " title="VIPS" src="http://tomazkovacic.com/blog/wp-content/uploads/2011/03/VIPS-300x270.jpg" alt="" width="300" height="270" /></a>[/caption]</p>
+<p>What’s distinctive about <a href="http://www.zjucadcg.cn/dengcai/VIPS/VIPS.html">this algorithm</a> from others mentioned in this post is making full use of the visual page layout features.</p>
+<p>It first extracts blocks from the HTML DOM tree and assigns them a value that indicates the coherency of the block based on visual perception. A hierarchical semantic structure is then employed to represent the structure of the website. The algorithm applies vertical and horizontal separators to the block layout to construct such a semantic structure.</p>
+<p>The constructed structure is then used to find parts of the website that represents article text and other common building blocks.</p>
+<h2>Readabillity</h2>
+<p>A perfect example of good ol’ hand crafted heuristics. <a href="http://code.google.com/p/arc90labs-readability/">Readability</a> relies solely on common HTML coding practices to extract article text, title, corresponding images and even the next button if the article seems to be segmented into several pages.</p>
+<p>Readability was originally developed as a JavaScript bookmarklet with a mission to mitigate the troubles of reading trough ad cluttered news websites. Readability is nowadays the most popular article text extraction tool.</p>
+<p>Originally written and maintained in JavaScript it was also ported to <a href="https://github.com/gfxmonk/python-readability">python</a> and <a href="https://github.com/iterationlabs/ruby-readability">ruby</a>.</p>
+<h2>Conclusion</h2>
+<p>I admit I haven’t covered all the text extraction algorithms lurking in the wild, but hopefully this post will save some time for those of you who want to dive straight into sparse literature and software packages.</p>
+<p>If you’ve been working on something similar or stumbled across a library that’s capable of full article text extraction from HTML documents, please drop me a line in the comments.</p>
+<p>In my next post I’ll try to bundle up a repository of available open source packages and web services capable of text extraction, so keep in touch by subscribing to my <a href="http://feeds.feedburner.com/tomazkovacic">RSS</a> feed.</p>

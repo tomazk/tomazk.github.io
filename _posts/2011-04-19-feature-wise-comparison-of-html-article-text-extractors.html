@@ -1,0 +1,122 @@
+---
+layout: post
+status: publish
+published: true
+title: Feature-wise Comparison of HTML Article Text Extractors
+author:
+  display_name: tomaz
+  login: tomaz
+  email: tomaz.kovacic@gmail.com
+  url: ''
+author_login: tomaz
+author_email: tomaz.kovacic@gmail.com
+wordpress_id: 98
+wordpress_url: http://tomazkovacic.com/blog/?p=98
+date: '2011-04-19 23:59:06 +0200'
+date_gmt: '2011-04-19 23:59:06 +0200'
+---
+<p>In one of my previous posts I compiled quite a decent <a href="http://tomazkovacic.com/blog/56/list-of-resources-article-text-extraction-from-html-documents/">list of software</a> (and other resources) all capable of extracting article content from an arbitrary HTML document. While I was gathering all the relevant papers and software I kept updating a handwritten spreadsheet that compares the listed software from a feature-wise viewpoint. So I updated it and decided to dump it on my blog. Hopefully this comparison table will mitigate the decision making process of developers whose products are dependent on such software.</p>
+<p>Firstly; let's review some shared functionality features explored for each piece of software in the table:</p>
+<ul>
+<li>structure retainment - Articles are usually formatted using various html tags - paragraphs, lists hyperlinks and ohers. Some text extractors tend to remove such structure and yield only the plain text of the article.</li>
+<li>inner content cleaning - The article content is sometimes broken into non-consecutive text blocks by ads and other boilerplate structures.  We're interested in capabilities to remove such inline boilerplate.</li>
+<li>implementation</li>
+<li>language dependency - Some are limited to only one language.</li>
+<li>source parameter - Can we fetch the document by ourselves or does the extractor fetch it internally?</li>
+<li>additional features (and remarks)</li>
+</ul>
+<table style="font-size: 70%;">
+<tbody>
+<tr>
+<td></td>
+<td><strong>structure retainment</strong></td>
+<td><strong>inner content cleaning</strong></td>
+<td><strong>implementation</strong></td>
+<td><strong>source parameter</strong></td>
+<td><strong>language dependancy</strong></td>
+<td><strong>additional features and remarks</strong></td>
+</tr>
+<tr>
+<td><strong><a href="http://code.google.com/p/boilerpipe/">Boilerpipe</a></strong></td>
+<td>plain text only</td>
+<td>uses a classifier to determine whether or not the atomic text block holds useful content</td>
+<td>open source java library</td>
+<td>you can fetch documents by yourself or use built-in utilities to fetch them for you</td>
+<td>should be language independent since the text block classifier observes language independent text features  </td>
+<td>implements many extractors with different classification rules trained on different datasets</td>
+</tr>
+<tr>
+<td><strong><a href="http://www.alchemyapi.com/api/text/">Alchemy API</a></strong></td>
+<td>text only (has an option to include relevant hyperlinks)</td>
+<td>n/a</td>
+<td>commercial web api</td>
+<td>include the whole document in the post request or provide an url</td>
+<td><em>observation:</em> returns an error for non-english content e.g. the document contains "unsupported text language"</td>
+<td>extra API call to extract the title</td>
+</tr>
+<tr>
+<td><strong><a href="http://www.diffbot.com/docs/api/article">Diffbot</a></strong></td>
+<td>plain text or html</td>
+<td>an option to remove inline ads</td>
+<td>web api (private beta)</td>
+<td>does fetching for you via provided url</td>
+<td>n/a</td>
+<td>extracts: relevant media, titile, tags, xpath descriptor for wrappers, comments and comment count, article summary</td>
+</tr>
+<tr>
+<td><strong><a href="http://code.google.com/p/arc90labs-readability/source/browse/trunk/js/readability.js">Readability</a></strong></td>
+<td>retains original structure</td>
+<td>uses hardcoded heuristics to extract content divided by ads</td>
+<td>open source javascript bookmarklet</td>
+<td>via browser</td>
+<td>language independent but it relies on language dependent regular expressions to match id and class labels</td>
+<td></td>
+</tr>
+<tr>
+<td><strong><a href="https://github.com/jiminoc/goose/wiki">Goose</a></strong></td>
+<td>plain text</td>
+<td>n/a</td>
+<td>open source java library</td>
+<td>url only (my <a href="https://github.com/tomazk/goose">fork</a> enables you to fetch the document by yourself)</td>
+<td>language independent but it relies on language dependent regular expressions to match id and class labels</td>
+<td>uses hardcoded heuristics to search for related images and embedded media</td>
+</tr>
+<tr>
+<td><strong><a href="http://extractiv.com/demo.html">Extractiv</a></strong></td>
+<td>depends on the chosen output format - e.g. xml format breaks the content into paragraphs</td>
+<td>n/a</td>
+<td>commercial web api</td>
+<td>include the whole document in post request or provide an url</td>
+<td>n/a</td>
+<td>capable of enriching the extracted text with semantic entities and relationships</td>
+</tr>
+<tr>
+<td><strong><a href="http://www.repustate.com/docs/#clean">Repustate API</a></strong></td>
+<td>plain text</td>
+<td>n/a</td>
+<td>commercial web api</td>
+<td>url only</td>
+<td>n/a</td>
+<td></td>
+</tr>
+<tr>
+<td><strong><a href="http://www.unixuser.org/~euske/python/webstemmer/#extract">Webstemmer</a></strong></td>
+<td>plain text</td>
+<td>n/a</td>
+<td>open source python library</td>
+<td>first runs a crawler to obtain seed pages, then it learns layout patterns that are later put to work to extract article content</td>
+<td>language independent</td>
+<td>the only piece of software on this list that requires a cluster of similar documents obtained by crawling</td>
+</tr>
+<tr>
+<td><strong><a href="http://webascorpus.sourceforge.net/PHITE.php?sitesig=FILES&amp;page=FILES_10_Software">NCleaner</a> </strong> (<a href="http://openstorage.mercubuana.ac.id/03/885_paper.pdf">paper</a>)</td>
+<td>plain text</td>
+<td>uses character level n-grams to detect content text blocks</td>
+<td>open source perl library</td>
+<td>arbitrary html document</td>
+<td>depends on the training language</td>
+<td>reliant on lynx browser for converting html to structured plain text</td>
+</tr>
+</tbody>
+</table>
+<p>The reason why some cells in the table are marked as "n/a" was that of this table was built by inspecting the respective software documentation or research papers where the information of an observed feature was absent. </p>

@@ -1,0 +1,82 @@
+---
+layout: post
+status: publish
+published: true
+title: 'List of resources: Article text extraction from HTML documents'
+author:
+  display_name: tomaz
+  login: tomaz
+  email: tomaz.kovacic@gmail.com
+  url: ''
+author_login: tomaz
+author_email: tomaz.kovacic@gmail.com
+wordpress_id: 56
+wordpress_url: http://tomazkovacic.com/blog/?p=56
+date: '2011-03-11 22:55:10 +0100'
+date_gmt: '2011-03-11 22:55:10 +0100'
+---
+<p><em><strong>UPDATE 21/3/2011: </strong>Added <em>reader contributed</em> links to software and API section</em><strong></strong></p>
+<p>Following up to my <a href="http://tomazkovacic.com/blog/14/extracting-article-text-from-html-documents/">overview</a> of article text extractors, I'll try to compile a list of research papers, articles, web APIs, libraries and other software that I encountered during my research.</p>
+<h2>Research papers and Articles</h2>
+<p>Just to summarize the ones mentioned in my previous post:</p>
+<ul>
+<li><a href="http://www.l3s.de/~kohlschuetter/boilerplate/">Boilerplate Detection using Shallow Text Features</a> by Kohlschütter et al</li>
+<li> <a href="http://www.www2009.org/proceedings/pdf/p971.pdf">Extracting Article Text from the Web with Maximum Subsequence Segmentation</a> by Pasternack &amp; Roth</li>
+<li><a href="http://www.cs.illinois.edu/homes/weninge1/pubs/WH_TIR08.pdf">Text Extraction from the Web via Text-to-Tag Ratio</a> by Weninger &amp; Hsu<br />
+and the extension of the main algorithm to 2D histogram clustering: <a href="http://www.cs.illinois.edu/homes/weninge1/pubs/WH_ANNIE08.pdf">Web Content Extraction Through Histogram Clustering</a> (another <a href="http://www.cs.illinois.edu/homes/weninge1/pubs/WHH_WWW10.pdf">version</a>)</li>
+<li><a href="http://www.zjucadcg.cn/dengcai/VIPS/VIPS.html">VIPS: a Vision-based Page Segmentation Algorithm</a></li>
+</ul>
+<p>Others not mentioned in the overview:</p>
+<ul>
+<li>Fairly old, but cited by nearly every paper with a similar topic: <a href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.21.8672&amp;rep=rep1&amp;type=pdf">Roadrunner</a> is a wrapper induction technique based on pattern discovery within similar HTML documents.</li>
+<li> <a style="font-family: Georgia, 'Bitstream Charter', serif; color: #0066cc; line-height: 1.5;" href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.1.7765&amp;rep=rep1&amp;type=pdf">Automatic Web News Extraction Using Tree Edit Distance</a>: This algorithm uses a tree comparison metric analogous to Levenshtein distance to detect relevant content in a set of HTML documents.</li>
+<li><a href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.18.7133&amp;rep=rep1&amp;type=pdf">Discovering Informative Content Blocks from WebDocuments</a>: A bit outdated due to some assumptions, but interesting because it employs entropy as a threshold metric to predict informative blocks of content.</li>
+<li><a href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.89.6371&amp;rep=rep1&amp;type=pdf">Web Page Cleaning with Conditional Random Fields</a>: If you will be reading any of the articles above, sooner or later you'll notice everybody is citing the <a href="http://cleaneval.sigwac.org.uk/">CleanEval</a> shared task which took place in 2007. This paper presents the best performing algorithm which makes use of <em>CRF</em> to label blocks of content as <em>text</em> or <em>noise</em> based on block level features.</li>
+</ul>
+<p>I've also stumbled upon these:</p>
+<ul>
+<li><a href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.71.7764&amp;rep=rep1&amp;type=pdf">Hierarchical wrapper induction for semistructured information sources</a></li>
+<li><a href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.60.4599&amp;rep=rep1&amp;type=pdf">Template detection for large scale search engines</a></li>
+<li><a href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.89.436&amp;rep=rep1&amp;type=pdf">Web Page Cleaning for Web Mining   through Feature Weighting</a></li>
+<li><a href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.4.4087&amp;rep=rep1&amp;type=pdf">Eliminating noisy information in   Web pages for data mining</a></li>
+</ul>
+<p>The only good blog article I came across is the one at <em>ai-depot.com</em>: <a href="http://ai-depot.com/articles/the-easy-way-to-extract-useful-text-from-arbitrary-html/">The Easy Way to Extract Useful Text from Arbitrary HTML</a>. The author is using examples written in python to employ a fairly similar technique described in the<em> text-to-tag ratio</em> paper listed above.</p>
+<h2>Software</h2>
+<p>There is only a small amount of competition when it comes to software capable of [removing boilerplate text / extracting article text / cleaning web pages / predicting informative content blocks] or whatever terms authors are using to describe the capabilities of their product.</p>
+<p>The least common denominator for all the listed software below is the following criteria: given an HTML document with an article in it, the system should yield the incorporated article itself (and maybe it's title and other meta-data):</p>
+<ul>
+<li><a href="http://code.google.com/p/boilerpipe/">Boilerpipe library</a>: an open source Java library. The library itself is the official implementation of the overall algorithm presented in the previously mentioned paper by Kohlschütter et al.</li>
+<li><a href="http://code.google.com/p/arc90labs-readability/">Readability bookmarklet</a> by arc90labs is open sourced. Originally written in JavaScript it was also ported to other languages:
+<ul>
+<li><a href="https://github.com/gfxmonk/python-readability">python-readabilty</a> - using BeautifulSoup (slow)</li>
+<li><a href="http://code.google.com/p/decruft/">fork</a> of python-readability employing lxml for faster parsing</li>
+<li><a href="https://github.com/starrhorne/ruby-readability">ruby-readability</a></li>
+<li><a href="http://www.keyvan.net/2010/08/php-readability/">PHP port</a></li>
+<li><a href="https://github.com/ifesdjeen/jReadability">jReadability</a></li>
+<li><a href="http://code.google.com/p/nreadability/">C# port</a></li>
+</ul>
+</li>
+<li><a href="https://github.com/jiminoc/goose/wiki">Project Goose</a> by Gravity labs</li>
+<li>Perl module <a href="http://search.cpan.org/~miki/HTML-Feature-2.00006/lib/HTML/Feature.pm">HTML::Feature</a></li>
+<li><a href="http://www.unixuser.org/~euske/python/webstemmer/#extract">Webstemmer</a> is a web crawler and page layout analyzer with a text extraction utility</li>
+<li>Demo of <a href="http://www.zjucadcg.cn/dengcai/VIPS/VIPS.html">VIPS</a> packaged in a .dll (it's use is limited to research purposes only)</li>
+</ul>
+<h2>Web APIs</h2>
+<p>After a short inquiry I came across some very decent web APIs:</p>
+<ul>
+<li><a href="http://www.alchemyapi.com/api/text/">Alchemy API Web Page Cleaning</a> - a well known commercial API with a limited free service</li>
+<li><a href="http://viewtext.org/help/api">ViewText.org</a> - they're asking you to be kind to their servers, so this is not your typical commercial service</li>
+<li><a href="http://www.diffbot.com/docs/api/article">DiffBot API</a> - describes itself as:<em> "Statistical machine learning algorithms are run over all of the visual elements on the page to extract out the article text and associated metadata, such as its images, videos, and tags."</em></li>
+<li><a href="http://purifyr.com/">Purifry</a> - is promising high performance and good accuracy. It's also available as a binary.</li>
+<li><a href="http://extractiv.com/demo.html">Extractiv</a> - text extraction is just a side feature</li>
+<li><a href="http://www.repustate.com/docs/#clean">Repustate API</a> - includes a <em>clean html</em> call</li>
+</ul>
+<h2>Related</h2>
+<p>There is a ton of stuff out there that is somehow related to items listed above. Perhaps you'll find them interesting or at least useful:</p>
+<ul>
+<li>Full text RSS feed builder at <a href="http://fulltextrssfeed.com/">fulltextrssfeed.com</a> - a very neat example of putting article text extraction into practice</li>
+<li><a href="http://fivefilters.org/content-only/">FiveFilter.org</a><em> - </em>another full text RSS builder. According to their FAQ, they're using readability ported to PHP</li>
+<li>Boilerpipe has a nice <a href="http://boilerpipe-web.appspot.com/">demo</a> running on appengine</li>
+<li><a href="http://took.cs.uiuc.edu/MSS/default.aspx">Demo</a> of the previously mentioned extraction algorithm using maximum subsequence optimization</li>
+</ul>
+<p>This is it. Hopefully you now have a better perspective of the sparse literature and software on the topic in question. If you're aware of an item that should be added to any of the lists in this post, please drop me a line in the comments. Don't forget to subscribe to my <a href="http://feeds.feedburner.com/tomazkovacic">RSS</a> feed for related updates.</p>

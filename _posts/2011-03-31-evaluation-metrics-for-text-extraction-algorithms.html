@@ -1,0 +1,57 @@
+---
+layout: post
+status: publish
+published: true
+title: Evaluation Metrics for Text Extraction Algorithms
+author:
+  display_name: tomaz
+  login: tomaz
+  email: tomaz.kovacic@gmail.com
+  url: ''
+author_login: tomaz
+author_email: tomaz.kovacic@gmail.com
+wordpress_id: 74
+wordpress_url: http://tomazkovacic.com/blog/?p=74
+date: '2011-03-31 00:21:36 +0200'
+date_gmt: '2011-03-31 00:21:36 +0200'
+---
+<p>In my two previous posts <em>(both were issued on <a href="http://news.ycombinator.com/item?id=2344049">hacker news</a>, <a href="http://www.readwriteweb.com/hack/2011/03/text-extraction.php">ReadWriteWeb</a> and <a href="http://radar.oreilly.com/2011/03/four-short-links-21-march-2011.html">O'Reilly Radar</a>)</em> I've covered quite a decent array of various text extraction methods and related software. So before reading this one I encourage you to read them to get a better feel of the topic. I bet those of you who read both posts, are eager to ascertain which method performs best. Before getting into performance and accuracy evaluation, we first have to set the groundwork by defining evaluation metrics.</p>
+<h2>Precision, Recall &amp; F1-score</h2>
+<p>Both precision and recall are widely used metrics in various fields of study; classification, pattern recognition and information retrieval being most noticeable. When evaluating text extraction algorithms, we feel most comfortable using their respective information retrieval context.</p>
+<p>Let's pretend for a while we are evaluating a search engine that retrieves a set of documents given a specific search term. Using this generic example we will review the formal definitions of precision and recall in their information retrieval context.</p>
+<p>Formally precision and recall are defined as:</p>
+<p><a href="http://tomazkovacic.com/blog/wp-content/uploads/2011/03/precision.gif"><img class="alignnone size-full wp-image-75" title="precision" src="http://tomazkovacic.com/blog/wp-content/uploads/2011/03/precision.gif" alt="" width="189" height="44" /></a> <a href="http://tomazkovacic.com/blog/wp-content/uploads/2011/03/recall.gif"><img class="alignnone size-full wp-image-76" title="recall" src="http://tomazkovacic.com/blog/wp-content/uploads/2011/03/recall.gif" alt="" width="160" height="44" /></a></p>
+<p>Where<em> S<sub>ret </sub></em> denotes the set of retrieved documents and <em>S<sub>rel</sub></em><small> </small>the set of documents relevant to the provided search term.</p>
+<p>This interpretation of both measures can easily be applied to text extraction. Instead of retrieved and relevant documents for the given search term, we now have the following situation: given an HTML document we predict/extract/retrieve a set of words and denote them as <em> S<sub>ret </sub></em>. Consequentially the set of words of the relevant text is denoted as <em> S</em><em><sub>rel </sub></em>.</p>
+<p>Formal definitions aside we must now explore the construction of these sets of words. There are many representations for text documents and but not all are suited for determining such sets. The most common model for representing text documents widely known in NLP, the bag-of-words model, has  a tendency to produce biased results when used to construct sets of relevant and retrieved words. Since BOW discards all grammatical information and even word order of the original text, we have no way of determining if multiple instances of the retrieved word are part of the article content or part of the website's boilerplate structure (navigation, menus, related articles ...).</p>
+<p>A quick observation leads us to an improved model (for representing retrieved and relevant text) which retains word order - the array-of-words. This model is constructed by the following procedure:</p>
+<ol>
+<li>remove punctuation</li>
+<li>split the text into an array of words using whitespace as a delimiter</li>
+<li>lowercase all words</li>
+<li>(optional) stem all numbers and dates to neutral tokens</li>
+</ol>
+<p>Calculating the denominator of  both precision and recall using this model is trivial. But what about the numerator - the intersection between retrieved and relevant segment of text? The array-of-words model allows us to make use of delta calculating procedures. The idea is to compute a list of largest continuous subsequences of matching words inside two sequences of words.</p>
+<p>Luckily for us, python programmers, there is a module inside the standard library that provides helpers for comparing sequences. Here is a quick example:</p>
+<p><script src="https://gist.github.com/895209.js"> </script></p>
+<p>With precision and recall in the bag, we now review a measure that combines both. F1-score is the harmonic mean of precision and recall and is computed using the following equation:</p>
+<p><a href="http://tomazkovacic.com/blog/wp-content/uploads/2011/03/f1-score.gif"><img class="alignnone size-full wp-image-83" title="f1-score" src="http://tomazkovacic.com/blog/wp-content/uploads/2011/03/f1-score.gif" alt="" width="250" height="42" /></a></p>
+<p>F1-score is derived from a generalized F-beta-measure equation:</p>
+<p><a href="http://tomazkovacic.com/blog/wp-content/uploads/2011/03/f-beta-score.gif"><img class="alignnone size-full wp-image-84" title="f-beta-score" src="http://tomazkovacic.com/blog/wp-content/uploads/2011/03/f-beta-score.gif" alt="" width="337" height="42" /></a></p>
+<p><a href="http://en.wikipedia.org/wiki/F1_score">Wikipedia</a> holds a quote, that perfectly articulates the relation of beta, precision and recall in the F-beta-measure equation:</p>
+<blockquote><p>β measures the effectiveness of retrieval with respect to a user who attaches β times as much importance to recall as precision</p></blockquote>
+<h2>Levenshtein Edit Distance</h2>
+<p>Apart from precision and recall, Levenshtein distance comes from the world of information theory. It's used to determine the number of edit operations needed for transforming one string into the other. Edit operations in the original version of Levenshtein distance are: insertion, deletion and substitution of a single character.</p>
+<p>We could employ this measure to compare retrieved and relevant text represented as single strings. The downfall: computationally intensive and biased results due to whitespace character noise. But rather than using the single string representation, we use the array-of-words to represent both texts and than count the edit operations based on words to compute the mutual similarity.</p>
+<p>A fairly simmilar technique was put into action during the <a href="http://cleaneval.sigwac.org.uk/Cleaneval_LREC_abstract.pdf">CLEANEVAL competition</a>, dedicated to competitive evaluation of cleaning arbitrary web pages. Their scoring was based on:</p>
+<blockquote><p>Levenshtein edit distance: the smallest number of ‘insert word’ and‘delete word’ steps to get from the one text to the other. Prior to calculating edit distance, we normalised both files by lower­casing, deleting punctuation and other non­alphanumeric characters and normalising whitespace.</p></blockquote>
+<h2>My Ideas &amp; Conclusion</h2>
+<p>Metrics discussed above are based solely on text and that's fine. But what if you're also interested in the retained DOM structure of the content and other related attributes such as links, images and videos? Some implementations of text/content extractors have this capability that is widely ignored in all research based experimental evaluation setups since they're focused only on pure text.</p>
+<p>Testing if the retrieved content includes relevant links, videos and images is somehow trivial, but what about the retained DOM structure? Assuming text extractors retain only the basic blocks (paragraphs, lists, anchor tags) of the original structure, comparing them back to the cleaned segment makes the problem even worse.</p>
+<p>Challenged by the arisen issue I've been forging a technique to evaluate the correctness of the retained DOM structure. It roughly follows these guidelines:</p>
+<ul>
+<li>Flatten the DOM trees of the retrieved and relevant segments</li>
+<li>Compare the flattened DOM trees with a tree edit distance. Analogous to the Levensthtein distance this measure computes the number of operations needed to transform one tree structure into the other. It was originally developed for comparing ASTs of source code to detect plagiarism, but was later applied to other areas of study.  <em>(see chapter 4.2. in </em><em><a href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.66.277&amp;rep=rep1&amp;type=pdf">this</a></em><em> paper)</em></li>
+<li>Employ levenshtein distance to compare contents of each block</li>
+</ul>
+<p>Hopefully I'll be able to report about the success (or failure due to expected time complexity) in one of my next posts. I'll also do my best to reveal some early evaluation results of my experimental setup making use of metrics discussed in this post. So feel free to subscribe to my <a href="http://feeds.feedburner.com/tomazkovacic">RSS feed</a> or follow me on <a href="http://twitter.com/tomaz">twitter</a> for more updates.</p>
