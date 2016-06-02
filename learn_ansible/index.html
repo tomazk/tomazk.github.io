@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Ansible for Developers in 30 min</title>
+    <meta charset="utf-8">
+    <style>
+      @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body { font-family: 'Droid Serif'; }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: normal;
+      }
+
+
+      .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
+
+      .remark-inline-code {
+        background-color: #eee;
+      }
+
+      .hljs-attr {
+        color: #990073;
+      }
+
+      pre {
+        background: #F0F0F0;
+      }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+
+class: center, middle
+
+# Ansible for Developers in 30 min
+
+Tomaž Kovačič ([@tomazk](http://github.com/tomazk) on github)
+
+---
+
+class: center, middle
+
+# Why should a developer learn Ansible?
+
+---
+
+# *I'll just use bash* ...
+```bash
+if ssh $HOST stat $REMOTE_PATH$FILE
+then
+  echo "file exists"
+else
+  scp $FILE $HOST:$REMOTE_PATH$FILE
+  echo "copy file to remote host"
+fi
+
+REMOTE_HASH=$(ssh $HOST "md5sum $REMOTE_PATH$FILE" | sed "s/ .*$//g")
+LOCAL_HASH=$(md5sum $FILE | sed "s/ .*$//g")
+
+if [ "$REMOTE_HASH" != "$LOCAL_HASH" ]
+then
+  echo "files are different - copy file"
+  scp $FILE $HOST:$REMOTE_PATH$FILE
+fi
+
+ssh $HOST "chmod 664 $REMOTE_PATH$FILE"
+```
+
+---
+
+# Further questions
+
+* How do you manage output of the remote bash scripts?
+* How to make your bash script idempotent?
+* How to paralelize your scripts to run them against multiple servers?
+* ...
+
+**Anwser:** All of the above is doable in bash, but some good people developed better tools for this!
+
+---
+
+class: middle
+
+# Ansible
+
+
+```yml
+- name: make sure this file is present on a server
+  copy: src=templates/file_name.txt
+        dest=/remote/path/file_name.txt
+        mode="u=rw,g=rw,a=r"
+```
+
+---
+
+
+
+# Ansible
+## *What about Ansible's competitors? (Chef, Puppet)*
+
+1. Ansible is simple to learn and start with
+  * no agents, no masters
+
+2. Ansible is written in python and config is based on YAML
+  * chef and pupet config is ruby DSL
+
+3. You only need your machine, remote servers and SSH access
+
+
+---
+
+# Ansible
+## *Ansible and container ecosystem? (Docker, Kubernetes)*
+
+* In a container ecosystem we have the following layers:
+  * OS layer (i.e. hosts for containers)
+  * Application managment layer (i.e. Kubernetes)
+  * Containers
+
+* Ansible is still required to manage configuration on hosts that participate in an application cluster (i.e. kubernetes nodes).
+
+---
+
+
+class: middle
+
+# Ansible Concepts
+
+1. Inventory
+2. Module
+3. Playbook
+
+*Let's explain these through a mini tutorial ...*
+
+
+---
+# Mini Tutorial
+## 1. Inventory
+
+`/etc/ansible/hosts` is where you tell ansible where your servers are
+
+```config
+[webnodes]
+n2 ansible_host=54.157.240.35
+n1 ansible_host=54.147.244.81
+
+[webnodes:vars]
+ansible_user=ubuntu
+
+[haproxy]
+haproxy1 ansible_host=54.204.93.217
+haproxy2 ansible_host=54.145.233.42
+
+[haproxy:vars]
+ansible_user=debian
+```
+---
+
+# Mini Tutorial
+## 2. Module
+
+* Modules are high level *"commands"* that can be executed on a remote server.
+* They abstract away a lot of unimportant details and promote best practices.
+
+```yml
+- name: make sure this file is present on a server
+  copy: src=templates/file_name.txt
+        dest=/remote/path/file_name.txt
+        mode="u=rw,g=rw,a=r"
+```
+The [`copy`](http://docs.ansible.com/ansible/copy_module.html) module.
+
+---
+
+# Mini Tutorial
+
+## 3. Playbook
+
+Playbooks are recepies that are run against a single or a series of remote servers.
+
+`example_playbook.yaml`
+```yaml
+- hosts: nodes
+  tasks:
+      - name: copy
+        copy: src=templates/file_name.txt
+              dest=/remote/path/file_name.txt
+              mode="u=rw,g=rw,a=r"
+        become: yes
+        become_method: sudo
+```
+
+```bash
+$ ansible-playbook example_playbook.yaml
+```
+
+
+---
+class: center, middle
+
+# That's it. Now you know Ansible.
+
+---
+
+class: center, middle
+
+# What more?
+Let's just expand on all 3 concepts and explore some realistic examples.
+
+---
+
+# Ad-hoc Commands
+
+Every module can be run as a single command
+
+```bash
+$ ansible webnodes -m ping
+```
+
+```bash
+$ ansible webnodes -m command -a "shutdown -r now"
+```
+
+
+---
+
+# Dynamic Inventory
+
+### Perfect marriage of [AWS and Ansible](http://docs.ansible.com/ansible/intro_dynamic_inventory.html#example-aws-ec2-external-inventory-script)
+
+1. Provide Ansible with your AWS credentials in the environment.
+```bash
+export AWS_ACCESS_KEY_ID='...'
+export AWS_SECRET_ACCESS_KEY='...'
+```
+
+2. Download [`https://raw.github.com/.../ec2.py`](https://raw.github.com/ansible/ansible/devel/contrib/inventory/ec2.py) and `chmod u+x ec2.py`
+
+3. Download and modify your ec2 defaults in [`ec2.ini`](https://raw.githubusercontent.com/ansible/ansible/devel/contrib/inventory/ec2.ini).
+
+4. See what invenotry is available `./ec2.py --refresh-cache`
+
+5. Ping all servers in group `webnodes` (fyi: group is just another resource tag in AWS)
+   `ansible tag_group_webnodes -i ec2.py -m ping`
+
+---
+
+
+# Ansible and Idempotency
+
+Ansible playbooks can be applied multiple times to get the node in the desired state. It provides the tools to do so in every module.
+
+Example #1:
+
+```yaml
+- name: run make if binary does not exist
+  shell: make && make install
+  args:
+    chdir: /home/ubuntu/keepalived/
+    creates: /home/ubuntu/keepalived/bin/keepalived
+```
+
+1. check if `bin/keepalived` exists
+2. run `make && make install` if it doesn't
+
+Example #2
+
+```yaml
+- get_url: url=http://path.to/bin.tar dest=/home/ubuntu/bin.tar
+```
+
+---
+
+# Idempotency and Output
+
+```
+PLAY ***************************************************************************
+
+TASK [setup] *******************************************************************
+ok: [127.0.0.1]
+
+TASK [get_url] *****************************************************************
+changed: [127.0.0.1]
+
+PLAY RECAP *********************************************************************
+127.0.0.1                  : ok=2    changed=1    unreachable=0    failed=0
+```
+
+```
+PLAY ***************************************************************************
+
+TASK [setup] *******************************************************************
+ok: [127.0.0.1]
+
+TASK [get_url] *****************************************************************
+ok: [127.0.0.1]
+
+PLAY RECAP *********************************************************************
+127.0.0.1                  : ok=2    changed=0    unreachable=0    failed=0
+```
+
+---
+
+
+# Conditionals & Variables
+
+Example: try downloading tar from github and fallback to local mirror, if it fails..
+
+```yaml
+- get_url: url=http://github.com/.../vegeta.tar.gz dest=/tmp/vegera.tar.gz
+  ignore_errors: True
+  register: result
+- get_url: url=http://localmirror/vegeta.tar.gz dest=/tmp/vegera.tar.gz
+  when: result|failed
+```
+
+---
+
+# More about Variables
+
+```yaml
+tasks:
+  - get_url: url=http://zemanta.com dest=/tmp/zemanta.html
+    register: result
+  - debug: var=result
+  - assert:
+      that: "result.mode == 0664"
+```
+
+```
+TASK [debug] *******************************************************************
+ok: [127.0.0.1] => {
+    "result": {
+        "changed": false,
+        "dest": "/tmp/zemanta.html",
+        "gid": 1000,
+        "group": "tomaz",
+        "mode": "0664",
+        "msg": "file already exists",
+        "owner": "tomaz",
+        "size": 83058,
+        "state": "file",
+        "uid": 1000,
+        "url": "http://zemanta.com"
+    }
+}
+```
+
+---
+
+# Loops
+
+```yaml
+- apt: name={{ item }} update_cache=yes
+  with_items:
+    - nginx
+    - supervisor
+    - htop
+```
+
+---
+
+# Jinja 2 Templates
+
+```yaml
+- template: src=templates/haproxy.cfg.j2 dest=/etc/haproxy/haproxy.cfg
+```
+
+```
+[... snip ...]
+backend testappbackend
+        maxconn 2000000
+        timeout connect 5000
+        timeout client 50000
+        timeout server 50000
+        balance roundrobin
+        option httpclose
+        option forwardfor
+        option httpchk GET /healthcheck/
+        default-server inter 1s fall 2 rise 2
+        # auto generated by ansible
+{% for host in groups['tag_group_tnode'] %}
+        server node-{{ host }} {{ host }}:80 check
+{% endfor %}
+```
+
+---
+
+# Handlers
+
+Create application deployment script with minimal code
+
+```yaml
+tasks:
+  - name: copy http server bin
+    copy: src=~/go/bin/test_server_for_ansible
+      dest={{ homedir }}/test_server_for_ansible
+      mode="u=rx"
+      owner=appuser
+      group=appusers
+    notify:
+      - restart supervisorapp
+handlers:
+  - name: restart supervisorapp
+    supervisorctl: name=my_app state=restarted
+    become: yes
+    become_method: sudo
+```
+
+---
+
+# Delegation
+
+Run tasks on a single node.
+
+```yaml
+- block:
+    - name: make sure sqs queues exists - one per node
+      sqs_queue:
+        name: "haproxy-config-update-{{ hostvars[item]['ec2_tag_Name'] }}"
+        state: present
+        aws_access_key: "{{ lookup('env', 'AWS_ACCESS_KEY_ID') }}"
+        aws_secret_key: "{{ lookup('env', 'AWS_SECRET_ACCESS_KEY') }}"
+        region: "{{ lookup('env', 'AWS_REGION') }}"
+      with_items: "{{ groups['tag_group_haproxy'] }}"
+
+  run_once: true
+  delegate_to: node1
+```
+
+---
+class: middle
+
+# Recap
+
+1. Mini tutorial: Inventory, Module, Playbook
+2. Ad-hoc commands
+3. Dynamic inventory (useful for AWS)
+4. Idempotency
+5. Variables & Loops
+6. Templates, Handlers and Delegation
+
+---
+
+class: middle
+
+# Where to go from here ?
+
+* Ansible Playbooks [documentation](http://docs.ansible.com/ansible/playbooks.html)
+* [Module Index](http://docs.ansible.com/ansible/modules_by_category.html)
+* [Advanced Topics](http://docs.ansible.com/ansible/playbooks_special_topics.html)
+
+---
+
+class: middle, center
+
+# Questions?
+
+
+
+    </textarea>
+    <script src="https://gnab.github.io/remark/downloads/remark-latest.min.js">
+    </script>
+    <script>
+      var slideshow = remark.create();
+    </script>
+  </body>
+</html>
