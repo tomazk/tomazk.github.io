@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Ansible for Developers in 30 min</title>
+    <meta charset="utf-8">
+    <style>
+      @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body { font-family: 'Droid Serif'; }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: normal;
+      }
+
+
+      .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
+
+      .remark-inline-code {
+        background-color: #eee;
+      }
+
+      .hljs-attr {
+        color: #990073;
+      }
+
+      pre {
+        background: #F0F0F0;
+      }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+
+class: center, middle
+
+# `docopt` - the coolest way to parse CLI args
+
+Tomaž Kovačič ([@tomazk](http://github.com/tomazk) on github)
+
+---
+
+class: middle
+
+# *Have to parse them args ...*
+
+
+* **I got this!!1** BRUTEFORCE!
+```c
+  for (i = 1; i < argc; i++) {
+    printf("argv[%u] = %s\n", i, argv[i]);
+    if (argv[i][0] == '-') {
+       if (argv[i][1] == 'i')
+       {
+           caseIns = 1;
+       }
+       if (argv[i][1] == 'l')
+       {
+          // continues for 100 more lines of code ...
+       }
+```
+* Boom! `--help`, `-h` to the rescue!
+```c
+
+    if (argv[i][0] == '-') {
+       if (argv[i][1] == 'h')
+       {
+           print(
+              "My awesome command!"
+              "  -h       help"
+              "  -i [INT] index in array"
+           );
+       }
+```
+
+---
+
+class: middle
+
+# I got 99 problems, but arg parsing ain't one!
+
+
+*.... but wait ... actually it is ...*
+
+* Logic separated from documentation?
+
+* 100 lines of code for parsing 5 arguments?
+
+* Support for required arguments? `awsm required_arg`
+
+* Support for flags? `awsm --flag`
+
+* Support for flag shortcuts? `awsm -f`
+
+* Support for flag arguments? `awsm -i 9000`
+
+* Support for multiple flag arguments? `awsm -i 9000 10000 11000`
+
+* Support for argument type checking? `awsm -i 0.5`
+
+
+
+---
+
+# Import [`yargs`](https://github.com/yargs/yargs) for JS
+
+```javascript
+
+#!/usr/bin/env node
+require('yargs') // eslint-disable-line
+  .command('serve [port]', 'start the server', (yargs) => {
+    yargs
+      .positional('port', {
+        describe: 'port to bind on',
+        default: 5000
+      })
+  }, (argv) => {
+    if (argv.verbose) console.info(`start server on :${argv.port}`)
+    serve(argv.port)
+  })
+  .option('verbose', {
+    alias: 'v',
+    default: false
+  })
+  .argv
+
+```
+
+---
+
+# Or [`commander.js`](https://github.com/tj/commander.js/) for JS
+
+```javascript
+#!/usr/bin/env node
+
+var program = require('commander');
+
+program
+  .version('0.1.0')
+  .option('-p, --peppers', 'Add peppers')
+  .option('-P, --pineapple', 'Add pineapple')
+  .option('-b, --bbq-sauce', 'Add bbq sauce')
+  .option('-c, --cheese [type]', 'Add the specified type of cheese [marble]', 'marble')
+  .parse(process.argv);
+
+console.log('you ordered a pizza with:');
+if (program.peppers) console.log('  - peppers');
+if (program.pineapple) console.log('  - pineapple');
+if (program.bbqSauce) console.log('  - bbq');
+console.log('  - %s cheese', program.cheese);
+```
+
+---
+
+# `OptionParser` or `Slop` anyone?
+
+
+```ruby
+require 'optparse'
+
+options = {}
+OptionParser.new do |opts|
+  opts.banner = "Usage: example.rb [options]"
+
+  opts.on("-v", "--[no-]verbose", "Run verbosely") do |v|
+    options[:verbose] = v
+  end
+end.parse!
+
+```
+
+```ruby
+
+opts = Slop.parse do |o|
+  o.string '-h', '--host', 'a hostname'
+  o.integer '--port', 'custom port', default: 80
+  o.string '-l', '--login', required: true
+  o.on '--version', 'print the version' do
+    puts Slop::VERSION
+    exit
+  end
+end
+
+ARGV #=> -v --login alice --host 192.168.0.1 --check-ssl-certificate
+
+opts[:host]                 #=> 192.168.0.1
+opts[:login]                #=> alice
+
+```
+
+---
+
+class: middle
+
+.center[
+![wheel](./wheel.png)
+]
+
+* I'll write my own!
+
+* Why isn't there a standard?
+
+* But wait ...?
+
+.center[
+# `docopt`
+[http://docopt.org/](http://docopt.org/)
+]
+
+
+---
+
+# Command line interface description language
+
+```
+Naval Fate.
+
+Usage:
+  naval_fate ship new <name>...
+  naval_fate ship <name> move <x> <y> [--speed=<kn>]
+  naval_fate ship shoot <x> <y>
+  naval_fate mine (set|remove) <x> <y> [--moored|--drifting]
+  naval_fate -h | --help
+  naval_fate --version
+
+Options:
+  -h --help     Show this screen.
+  --version     Show version.
+  --speed=<kn>  Speed in knots [default: 10].
+  --moored      Moored (anchored) mine.
+  --drifting    Drifting mine.
+```
+
+.center[
+ **What will `ship Guardian move 10 50 --speed=20` produce?**
+]
+
+---
+
+# argv: `ship Guardian move 10 50 --speed=20`
+
+```json
+
+{
+  "--drifting": false,
+  "--help": false,
+  "--moored": false,
+  "--speed": "20",
+  "--version": false,
+  "<name>": [
+    "Guardian"
+  ],
+  "<x>": "10",
+  "<y>": "50",
+  "mine": false,
+  "move": true,
+  "new": false,
+  "remove": false,
+  "set": false,
+  "ship": true,
+  "shoot": false
+}
+
+```
+
+---
+
+# Coffee Script example
+
+```coffee
+doc = """
+Usage:
+  quick_example.coffee tcp <host> <port> [--timeout=<seconds>]
+  quick_example.coffee serial <port> [--baud=9600] [--timeout=<seconds>]
+  quick_example.coffee -h | --help | --version
+
+"""
+{docopt} = require '../docopt'
+
+console.log docopt(doc, version: '0.1.1rc')
+
+```
+
+
+Support for C, C#, JS, rust, Go, ... [github.com/docopt](https://github.com/docopt)
+
+
+---
+
+class: middle, center
+
+# Thx! Questions?
+
+
+    </textarea>
+    <script src="https://gnab.github.io/remark/downloads/remark-latest.min.js">
+    </script>
+    <script>
+      var slideshow = remark.create();
+    </script>
+  </body>
+</html>
